@@ -170,7 +170,7 @@ if __name__ == "__main__":
     rag_system = EnhancedRAGSystem()
     
     # Process documents - CHANGE THIS PATH TO YOUR DOCUMENTS
-    documents_path = r"D:\Books\Gartner Predicts 2024 Ai and Automation in IT Operations.pdf", r"D:\Books\AI-EV Driven explanation and QNAs.pdf"
+    documents_path = r"D:\Books\Gartner Predicts 2024 Ai and Automation in IT Operations.pdf"
     rag_system.process_documents(documents_path)
     
     print(f"Vector store contains {rag_system.get_document_count()} chunks")
@@ -187,4 +187,5 @@ if __name__ == "__main__":
         print(f"\nQ: {question}")
         answer = rag_system.query(question)
         print(f"A: {answer}")
+
         print("-" * 50)
