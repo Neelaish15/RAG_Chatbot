@@ -6,6 +6,21 @@ This project implements an Advanced Retrieval-Augmented Generation (RAG) chatbot
 
 🏗️ Architecture Diagram
 
+## 🏗️ Architecture Diagram
+
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ OpenWebUI │ │ FastAPI │ │ Ollama │
+│ (Docker) │◄──►│ RAG Server │◄──►│ LLM Service │
+│ Port: 3000 │ │ Port: 8001 │ │ Port: 11434 │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+│ │ │
+▼ ▼
+┌─────────────────┐ ┌─────────────────┐
+│ Frontend │ │ Document │
+│ (OpenWebUI) │ │ Knowledge Base │
+│ │ │ ./documents/ │
+└─────────────────┘ └─────────────────┘
+
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │                 │    │                 │    │                 │
 │   OpenWebUI     │    │   FastAPI       │    │   Ollama        │
@@ -24,7 +39,22 @@ This project implements an Advanced Retrieval-Augmented Generation (RAG) chatbot
 │                 │    │                 │
 └─────────────────┘    └─────────────────┘
 
-## Project Structure
+
+
+---
+
+## 📂 Project Structure
+
+RAG_Bot/
+├── 📄 api_server1.py # FastAPI server (main endpoint)
+├── 📄 Adv_Rag_chatbot.py # RAG system core logic
+├── 📄 requirements.txt # Python dependencies
+├── 📁 documents/ # PDFs and other documents
+│ ├── 📄 Gartner Predicts 2024 Ai and Automation in IT Operations.pdf
+│ └── 📄 ...other documents...
+├── 📁 chroma_db/ # Vector database (auto-created)
+└── 📁 frontend/ # Optional Tkinter UI for initial testing
+└── 📄 testing_UI.py
 
 RAG_Bot/
 ├── 📄 api_server1.py              # FastAPI server (main endpoint)
@@ -214,3 +244,4 @@ For issues related to:
 - OpenWebUI integration: Verify model configuration in OpenWebUI
 
 **End of the Document**
+
