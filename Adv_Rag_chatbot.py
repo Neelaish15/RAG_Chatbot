@@ -1,7 +1,6 @@
 # Adv_Rag_chatbot.py
 import os
 import glob
-from langchain_chroma import Chroma
 from langchain_community.document_loaders import (
     PyPDFLoader, 
     TextLoader,
@@ -69,52 +68,59 @@ class EnhancedRAGSystem:
         
         return documents
     
-    def process_documents(self, documents_path, chunk_size=1000, chunk_overlap=200):
-        """Process documents and create vector store"""
-        # Check if we already have a persisted vectorstore
-        if os.path.exists(self.persist_directory) and os.listdir(self.persist_directory):
-            print("Loading existing vector store...")
-            self.vectorstore = Chroma(
-                persist_directory=self.persist_directory, 
-                embedding_function=self.embeddings
-            )
+    def process_documents(self, documents_path):
+        print(f"Loading documents from: {documents_path}")
+
+        docs = []
+
+        if documents_path.endswith(".pdf"):
+            loader = PyPDFLoader(documents_path)
+            docs = loader.load()
+
+        elif documents_path.endswith(".txt"):
+            loader = TextLoader(documents_path, encoding="utf-8")
+            docs = loader.load()
+
+        elif documents_path.endswith(".docx"):
+            loader = Docx2txtLoader(documents_path)
+            docs = loader.load()
+
+        elif documents_path.endswith(".ppt") or documents_path.endswith(".pptx"):
+            loader = UnstructuredPowerPointLoader(documents_path)
+            docs = loader.load()
+
         else:
-            print("Processing documents and creating new vector store...")
-            # Load documents
-            documents = self.load_documents(documents_path)
+            raise ValueError("Unsupported file format. Please use PDF, TXT, DOCX, or PPTX")
+
+        # Split into smaller chunks
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+                )
+        splits = text_splitter.split_documents(docs)
+                
+        print(f"Split into {len(splits)} chunks")
+                
+                # Create vector store
+        self.vectorstore = Chroma.from_documents(
+                    documents=splits, 
+                    embedding=self.embeddings,
+                    persist_directory="chroma_store"
+                )
+                
+                # Persist the vector store
+        self.vectorstore.persist()
+        print("Vector store created and persisted")
             
-            if not documents:
-                raise ValueError("No documents found to process")
-            
-            # Split documents into chunks
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=chunk_size, 
-                chunk_overlap=chunk_overlap
-            )
-            splits = text_splitter.split_documents(documents)
-            
-            print(f"Split into {len(splits)} chunks")
-            
-            # Create vector store
-            self.vectorstore = Chroma.from_documents(
-                documents=splits, 
-                embedding=self.embeddings,
-                persist_directory=self.persist_directory
-            )
-            
-            # Persist the vector store
-            self.vectorstore.persist()
-            print("Vector store created and persisted")
-        
-        # Create retriever
+            # Create retriever
         self.retriever = self.vectorstore.as_retriever(
-            search_type="similarity",
-            search_kwargs={"k": 6}  # Adjust based on your needs
-        )
+                search_type="similarity",
+                search_kwargs={"k": 6}  # Adjust based on your needs
+            )
         
         # Set up the RAG chain
         self._setup_rag_chain()
-    
+
     def _setup_rag_chain(self):
         """Set up the RAG chain with prompt template"""
         template = """You are an assistant for question-answering tasks. 
@@ -142,7 +148,7 @@ class EnhancedRAGSystem:
             | llm
             | StrOutputParser()
         )
-    
+
     def query(self, question):
         """Query the RAG system"""
         if not self.rag_chain:
@@ -154,7 +160,7 @@ class EnhancedRAGSystem:
         
         print(f"Query took {end_time - start_time:.2f} seconds")
         return result
-    
+
     def get_document_count(self):
         """Get the number of documents in the vector store"""
         if self.vectorstore:
@@ -170,7 +176,7 @@ if __name__ == "__main__":
     rag_system = EnhancedRAGSystem()
     
     # Process documents - CHANGE THIS PATH TO YOUR DOCUMENTS
-    documents_path = r"D:\Books\Gartner Predicts 2024 Ai and Automation in IT Operations.pdf"
+    documents_path = r"D:\Books\Gartner Predicts 2024  Ai and Automation in IT Operations.pdf"
     rag_system.process_documents(documents_path)
     
     print(f"Vector store contains {rag_system.get_document_count()} chunks")
@@ -187,5 +193,4 @@ if __name__ == "__main__":
         print(f"\nQ: {question}")
         answer = rag_system.query(question)
         print(f"A: {answer}")
-
         print("-" * 50)
