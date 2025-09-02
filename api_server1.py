@@ -54,7 +54,7 @@ try:
         print(f"📁 Created documents directory at: {documents_path}")
     
     rag_system = EnhancedRAGSystem()
-    rag_system.process_documents(r"D:\Books\Gartner Predicts 2024 Ai and Automation in IT Operations.pdf", r"D:\Books\AI-EV Driven explanation and QNAs.pdf")
+    rag_system.process_documents(r"D:\Books\Gartner Predicts 2024 Ai and Automation in IT Operations.pdf")
     print("✅ RAG system initialized successfully!")
 except Exception as e:
     print(f"❌ Error initializing RAG system: {e}")
@@ -110,4 +110,5 @@ if __name__ == "__main__":
     print("🚀 Server running on http://localhost:8001")
     print("💡 Connect OpenWebUI to: http://localhost:8001/v1")
     print("📋 Health check: http://localhost:8001/health")
+
     uvicorn.run(app, host="0.0.0.0", port=8001)
